@@ -11,7 +11,7 @@ syste_prompt = SystemPrompt(
     definition="You will receive a chunk of text and a user query. You will summarize the text retaining the most important information relevant to the user query.",
     instructions=[
        "- You will receive chunks of a webpage in pieces.",
-       "- Once you receive a chunk, return a summarized version of the chunk "
+       "- Once you receive a chunk, return a summarized version of the chunk as `chunk_analysis`"
     ],
     dontdo=[
         "Don't add considerations",
@@ -29,7 +29,7 @@ class Response(BaseModel):
         summary: Summary of text chunk
         error: Error message if the operation fails.
     """
-    chunk_analysis: str = Field(description="Analysis of the text chunk")
+    chunk_analysis: str = Field(description="Summary of the text chunk")
     error: str | None = Field(description="Error message if the operation fails.")
 
 

@@ -8,7 +8,7 @@ config["chunk_overlap"] = 300
 async def test_query():
     async for result in query.exec(
         "What is a valid alternative to buy a smartphone?",
-        generate_query_limit=3,
+        generate_query_limit=1,
         link_limit=1,
     ):
         print("======= AGENT =======")

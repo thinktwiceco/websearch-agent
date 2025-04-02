@@ -27,7 +27,7 @@ class GraphState(TypedDict):
     user_query: Annotated[str, assert_equality]
     error: str | None
     queries: Annotated[list[str], operator.add]
-    pages: Annotated[list[Page], operator.add]
+    chunk_analysis: Annotated[list[str], operator.add]
     answer: str
     sources: list[str]
 

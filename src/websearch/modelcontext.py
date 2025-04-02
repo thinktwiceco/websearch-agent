@@ -27,7 +27,10 @@ class AppContext(BaseSettings):
     ollama_model: str = Field(alias='OLLAMA_MODEL', default="qwen2.5:7b")
     togetherai_model: str = Field(alias='TOGETHERAI_MODEL', default="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo")
     stream_response: bool = Field(alias='STREAM_RESPONSE', default=False)
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = {
+        "env_file": ".env",
+        "extra": "allow",
+    }
 
     def get_model_provider(self) -> OpenAIModel:
         def cachable_fn(p: Literal['ollama', 'together']):
