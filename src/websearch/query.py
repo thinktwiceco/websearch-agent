@@ -9,8 +9,7 @@ from websearch.state import GraphState
 async def exec(
         question: str,
         *,
-        generate_query_limit: int = 1,
-        link_limit: int = 1
+        result_limit: int = 1,
 ) -> Any:
 
     config = {
@@ -20,9 +19,8 @@ async def exec(
     }
 
     state = GraphState(
-        generate_query_limit=generate_query_limit,
-        link_limit=link_limit,
-        messages=[HumanMessage(content=question)],
+        result_limit=result_limit,
+        user_query=question,
     )
 
     async for msg in graph.astream(state, config):
@@ -34,7 +32,7 @@ async def exec(
         if syntetizer_result:
             yield {
                 "answer": syntetizer_result.get("answer"),
-                "links": syntetizer_result.get("links"),
+                "sources": syntetizer_result.get("sources"),
             }
         elif querygen_result:
             yield {

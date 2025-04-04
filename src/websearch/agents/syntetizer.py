@@ -11,14 +11,13 @@ syste_prompt = SystemPrompt(
     definition="You are a summarizing agent.",
     instructions=[
         "Read the user's question",
-        "Iterate over all the page content",
-        "Respond to the user question based on the page content",
-        "Report all the links that are used to answer the question",
-        "Use a detailed and descriptive tone"
+        "Read the chunks content",
+        "Answer the user question based on the chunks content",
+        "Answer the question also using your own knowledge",
     ],
     dontdo=[
         "Don't make up information",
-        "Only report information that are in the page content",
+        "Only report information that are in the chunk content",
     ],
 )
 

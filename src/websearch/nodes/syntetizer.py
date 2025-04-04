@@ -9,27 +9,32 @@ logger = root_logger.getChild(__name__)
 
 async def syntetizer(state: GraphState) -> Any:
     user_query = state["user_query"]
-    chunk_analysis = state["chunk_analysis"]
+    pages = state["pages"]
+
     pages_content = ""
+    for page in pages:
+        pages_content += f"## Page: {page['url']}: Category: {page['category']}\nContent:\n{page['content']}\n\n"
 
-    for chunk in chunk_analysis:
-        pages_content += f"##{chunk}\n\n"
-
-    message = f"User query: {user_query}\nChunks: {pages_content}"
+    message = f"User query: {user_query}\n Pages: {pages_content}"
     prompt = UserPrompt(
         query=message,
         steps=[
             "Read the user query",
-            "Read the chunks content",
-            "Answer the user query based on the chunks content",
-            "Report all the chunks that are used to answer the question",
+            "Read the pages content",
+            "Answer the user query based on the pages content",
+            "Report all the pages that are used to answer the question",
+            "Report all the sources that are used to answer the question",
+            "The sources are the Pages URLs"
         ]
     )
+
     logger.log_prompt("Syntetizer", message)
     agent_response = await syntetizerAgent.run(prompt.text())
     answer = agent_response.data.answer
+
     if answer:
-        logger.log_response("Syntetizer", answer)
+        logger.info(f"Answer: {answer}")
+        logger.info(f"Sources: {agent_response.data.sources}")
 
     if agent_response.data.error:
         return {"error": agent_response.data.error}

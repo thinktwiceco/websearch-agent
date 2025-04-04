@@ -11,7 +11,8 @@ syste_prompt = SystemPrompt(
     definition="You will receive a chunk of text and a user query. You will summarize the text retaining the most important information relevant to the user query.",
     instructions=[
        "- You will receive chunks of a webpage in pieces.",
-       "- Once you receive a chunk, return a summarized version of the chunk as `chunk_analysis`"
+       "- Respond to the user query based on the chunk content",
+       "- If the chunk is not relevant, respond with 'not relevant'",
     ],
     dontdo=[
         "Don't add considerations",
@@ -29,8 +30,9 @@ class Response(BaseModel):
         summary: Summary of text chunk
         error: Error message if the operation fails.
     """
-    chunk_analysis: str = Field(description="Summary of the text chunk")
-    error: str | None = Field(description="Error message if the operation fails.")
+    response: str = Field(description="Summary of the text chunk. If not relevant, return 'not relevant'")
+    source_url: str | None = Field(default=None, description="Source url of the chunk")
+    error: str | None = Field(default=None, description="Error message if the operation fails.")
 
 
 chunkanalyzerAgent = Agent(

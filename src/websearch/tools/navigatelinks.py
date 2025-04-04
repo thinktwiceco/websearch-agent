@@ -76,7 +76,7 @@ async def navigate_link(url: str) -> dict | None:
             # @cache.memoize(expire=60 * 60 * 24 * 30)
 
             logger.info(f"🚀 Exploring {url}")
-            await page.goto(url)
+            await page.goto(url, wait_until="domcontentloaded", timeout=40000)
             await page.wait_for_timeout(2000)
             logger.info(f"Page title: {await page.title()}")
             content = await page.content()
@@ -104,7 +104,7 @@ async def navigate_link(url: str) -> dict | None:
                                 text += "\n" + element.get_text().strip()
             # Remove excessive whitespace and normalize
             text = re.sub(r'\n+', '\n', text).strip()
-            text = remove_repeated_substrings(text)
+            text = clean_text(text)
             print("--- TEXT ---")
             print(text)
             print("--- END TEXT ---")
@@ -120,52 +120,101 @@ async def navigate_link(url: str) -> dict | None:
             await browser.close()
 
 
-def remove_repeated_substrings(text: str, min_length: int = 6, min_occurrences: int = 3) -> str:
+def clean_text(
+    text: str,
+    *,
+    min_length_segment: int = 20,
+    min_occurrences_segment: int = 2
+) -> str:
     """
-    Remove substrings that are longer than min_length and appear sequentially
-    more than min_occurrences times (possibly separated by whitespace).
+    Remove repeated text segments (phrases, paragraphs, etc.) that occur multiple times.
+
+    This implementation detects:
+    1. Repeated sentences and paragraphs
+    2. Repeated question blocks and sections
+    3. Sequences of similar content that appears multiple times
     
     Args:
         text: The input text to process
-        min_length: Minimum length of substring to consider (default: 6)
-        min_occurrences: Minimum number of sequential occurrences required for removal (default: 3)
-        
+        min_length: Minimum length of text segment to consider for removal (default: 20)
+        min_occurrences: Minimum number of occurrences required for removal (default: 2)
+    
     Returns:
-        The processed text with sequentially repeated substrings removed
+        The processed text with repeated content removed
     """
-    if not text or len(text) < min_length * min_occurrences:
+    if not text or len(text) < min_length_segment * min_occurrences_segment:
         return text
     
-    # Split the text into words
-    words = text.split()
-    result_words = []
-    i = 0
+    # Remove all the extra whitespace
+    text = re.sub(r'\s+', ' ', text)
+
+    # Remove all the extra newlines
+    text = re.sub(r'\n+', '\n', text)
+
+    # Remove all the extra tabs
+    text = re.sub(r'\t+', '\t', text)
+
+    # Remove all the extra spaces
+    text = re.sub(r'\s+', ' ', text)
+
+    # Remove all the extra dashes
+    text = re.sub(r'-{2,}', '-', text)
+
+    # Remove all the extra underscores
+    text = re.sub(r'_{2,}', '_', text)
     
-    while i < len(words):
-        # Check if this word is long enough
-        if len(words[i]) <= min_length:
-            result_words.append(words[i])
-            i += 1
-            continue
-            
-        # Look ahead to see if we have repeated occurrences
-        current_word = words[i]
-        repeat_count = 1
-        j = i + 1
-        
-        while j < len(words) and words[j] == current_word:
-            repeat_count += 1
-            j += 1
-            
-        # If we found enough repetitions, skip them all
-        if repeat_count >= min_occurrences:
-            i = j  # Skip all repetitions
-        else:
-            # Otherwise, keep the current word
-            result_words.append(current_word)
-            i += 1
+    # Remove all the extra asterisks, question marks, and exclamation points
+    text = re.sub(r'\*{2,}', '*', text)
+    text = re.sub(r'\?{2,}', '?', text)
+    text = re.sub(r'!{2,}', '!', text)
     
-    return ' '.join(result_words)
+    # Remove all the extra quotes
+    text = re.sub(r'"{2,}', '"', text)
+    text = re.sub(r"'{2,}", "'", text)
+    
+    # Remove all the extra commas
+    text = re.sub(r',{2,}', ',', text)
+    
+    # Remove all the extra periods
+    text = re.sub(r'\.{2,}', '.', text)
+    
+    # Split text into sentences or logical segments
+    segments = re.split(r'(?<=[.!?])\s+', text)
+    
+    # Dictionary to count occurrences of each segment
+    segment_counts = {}
+    for segment in segments:
+        if len(segment) >= min_length_segment:
+            segment_counts[segment] = segment_counts.get(segment, 0) + 1
+    
+    # Build result, keeping only the first occurrence of repeated segments
+    seen_segments = set()
+    result = []
+    for segment in segments:
+        if len(segment) < min_length_segment or segment_counts[segment] < min_occurrences_segment or segment not in seen_segments:
+            result.append(segment)
+            seen_segments.add(segment)
+
+    # Handle larger repeating blocks that might span multiple segments
+    result_text = ' '.join(result)
+
+    # Look for repeating blocks (paragraphs or groups of questions)
+    for block_size in range(100, min_length_segment, -20):  # Try different block sizes
+        i = 0
+        while i <= len(result_text) - block_size:
+            block = result_text[i:i+block_size]
+            if len(block) >= min_length_segment:
+                # Count occurrences of this block in the remaining text
+                remaining_text = result_text[i+block_size:]
+                count = remaining_text.count(block)
+
+                if count >= min_occurrences_segment - 1:  # -1 because we already have one occurrence
+                    # Remove all but the first occurrence
+                    result_text = result_text[:i+block_size] + remaining_text.replace(block, "", count)
+                    continue  # Stay at the same position to check for more repetitions
+            i += 1
+
+    return result_text
 
 
 NavigateLinksTool = Tool(

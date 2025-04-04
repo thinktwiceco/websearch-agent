@@ -9,9 +9,8 @@ logger = root_logger.getChild(__name__)
 
 
 async def querygen(state: GraphState) -> Any:
-    last_message: HumanMessage = state["messages"][-1]
-    query_limit = state["generate_query_limit"]
-    message = f"Query: {last_message.content}\n\nGenerate MAX {query_limit} queries"
+    user_query = state['user_query']
+    message = f"Query: {user_query}\n\n"
     logger.log_prompt("Querygen", message)
     agent_response = await querygenAgent.run(message)
     queries = "\n".join(agent_response.data.queries)
@@ -22,15 +21,17 @@ async def querygen(state: GraphState) -> Any:
 
     return {
         "queries": agent_response.data.queries or [],
-        "user_query": last_message.content,
+        "user_query": user_query,
     }
 
-def query_gen_router(state: GraphState) -> Literal["linksfinder", "__end__"]:
+def query_gen_router(state: GraphState) -> Literal["explorer", "__end__"]:
     if state.get("error"):
         return "__end__"
 
-    return [Send("linksfinder", {
-        "query": query,
-        "link_limit": state["link_limit"],
+    assert state['user_query']
+
+    return [Send("explorer", {
+        "agent_query": query,
         "user_query": state["user_query"],
+        "result_limit": state["result_limit"],
     }) for query in state['queries']]
