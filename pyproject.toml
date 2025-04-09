@@ -1,9 +1,17 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "websearch"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
+authors = [
+    {name = "Francesco Vertemati", email = "verte.fra@gmail.com"},
+]
+license = {text = "MIT"}
 
 dependencies = [
     "diskcache>=5.6.3",
