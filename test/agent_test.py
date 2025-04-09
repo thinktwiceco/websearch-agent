@@ -1,13 +1,12 @@
+"""Simple test for the websearch agent."""
 import asyncio
-from websearch import query
-from websearch import config
 
-config["chunk_size"] = 10000
-config["chunk_overlap"] = 300
+from websearch import query
 
 async def test_query():
+    """Test the query agent."""
     async for result in query.exec(
-        "What can I do If I want to avoid to buy a smartphone? How can I invest the saved money?",
+        "What's the carbon footprint of a google pixel phone?",
         result_limit=3,
     ):
         print("======= AGENT =======")

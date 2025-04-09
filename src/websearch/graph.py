@@ -1,9 +1,14 @@
-from langgraph.graph import StateGraph
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import START, END
+"""Web search graph module.
 
-from websearch.nodes.querygen import querygen, query_gen_router
+This module provides a graph for web search operations. It defines the nodes and edges
+for the web search graph and compiles it into a graph object.
+"""
+
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, START, StateGraph
+
 from websearch.nodes.explorer import explorer
+from websearch.nodes.querygen import query_gen_router, querygen
 from websearch.nodes.syntetizer import syntetizer
 from websearch.state import GraphState
 

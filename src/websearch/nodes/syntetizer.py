@@ -1,4 +1,10 @@
+"""Synthesizer node for web search operations.
+
+This module provides a node for synthesizing the answer from the pages.
+"""
+
 from typing import Any
+
 from websearch.agents.syntetizer import syntetizerAgent
 from websearch.prompts import UserPrompt
 from websearch.root_logger import root_logger
@@ -8,6 +14,10 @@ logger = root_logger.getChild(__name__)
 
 
 async def syntetizer(state: GraphState) -> Any:
+    """Synthesize the answer from the pages.
+
+    This function takes the user query and the pages and synthesizes the answer.
+    """
     user_query = state["user_query"]
     pages = state["pages"]
 
@@ -24,8 +34,8 @@ async def syntetizer(state: GraphState) -> Any:
             "Answer the user query based on the pages content",
             "Report all the pages that are used to answer the question",
             "Report all the sources that are used to answer the question",
-            "The sources are the Pages URLs"
-        ]
+            "The sources are the Pages URLs",
+        ],
     )
 
     logger.log_prompt("Syntetizer", message)
@@ -39,4 +49,7 @@ async def syntetizer(state: GraphState) -> Any:
     if agent_response.data.error:
         return {"error": agent_response.data.error}
 
-    return {"answer": agent_response.data.answer, "sources": agent_response.data.sources}
+    return {
+        "answer": agent_response.data.answer,
+        "sources": agent_response.data.sources,
+    }

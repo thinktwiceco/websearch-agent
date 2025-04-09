@@ -1,17 +1,52 @@
-from typing import Any
-import uuid
-from websearch.graph import graph
-from langchain_core.messages import HumanMessage
+"""Web search query execution module.
 
+This module provides functionality for executing web search queries and streaming results.
+It serves as the main interface for the websearch package, allowing users to submit
+questions and receive structured search results through an asynchronous streaming API.
+
+The module utilizes a graph-based search system to process queries, generate search terms,
+find relevant links, navigate to pages, and synthesize answers from the collected information.
+
+Example:
+    ```python
+    async for result in exec("What is quantum computing?"):
+        if "answer" in result:
+            print(f"Answer: {result['answer']}")
+            print(f"Sources: {result['sources']}")
+        elif "query" in result:
+            print(f"Generated query: {result['query']}")
+        # ... handle other result types
+    ```
+"""
+
+import uuid
+from typing import Any, AsyncIterator, Dict
+
+from websearch.graph import graph
 from websearch.state import GraphState
 
 
 async def exec(
-        question: str,
-        *,
-        result_limit: int = 1,
-) -> Any:
+    question: str,
+    *,
+    result_limit: int = 1,
+) -> AsyncIterator[Dict[str, Any]]:
+    """Execute a web search query and stream the results.
 
+    This function processes the given question through a graph-based search system
+    and asynchronously yields results as they become available.
+
+    Args:
+        question: The search query or question to be processed.
+        result_limit: Maximum number of results to return. Defaults to 1.
+
+    Yields:
+        Dict containing one of the following result types:
+            - {"answer": str, "sources": list} - Synthesized answer with sources
+            - {"query": str} - Generated search query
+            - {"links": list} - Found links
+            - {"pages": list} - Navigation pages
+    """
     config = {
         "thread_id": str(uuid.uuid4()),
         "timeout": 1000,

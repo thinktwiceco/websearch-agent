@@ -1,29 +1,43 @@
+"""Explorer node for web search operations.
 
+This module provides a node for exploring the web for the most relevant pages.
+"""
 
 from typing import TypedDict
-from websearch.prompts import UserPrompt
-from websearch.agents.explorer import explorerAgent
+
 from langgraph.types import Command
 
-
+from websearch.agents.explorer import explorerAgent
+from websearch.prompts import UserPrompt
 from websearch.root_logger import root_logger
 
 logger = root_logger.getChild(__name__)
 
 
 class ExplorerState(TypedDict):
+    """State for the explorer node.
+
+    This class represents the state for the explorer node. It contains the agent
+    query, user query, and result limit.
+    """
+
     agent_query: str
     user_query: str
     result_limit: int
 
 
 async def explorer(state: ExplorerState):
-    agent_query = state['agent_query']
+    """Explore the web for the most relevant pages.
+
+    This function takes the agent query and user query and explores the web for
+    the most relevant pages.
+    """
+    agent_query = state["agent_query"]
 
     if not agent_query:
         return {"error": "No agent query provided"}
 
-    user_query = state['user_query']
+    user_query = state["user_query"]
 
     if not user_query:
         return {"error": "No user query provided"}
@@ -44,8 +58,8 @@ async def explorer(state: ExplorerState):
             "Perform a web search to find the most relevant pages",
             "Analyze the results and think about the user query and the agent query",
             f"Select the top {result_limit} pages that are most relevant to the user query and the agent query",
-            "Return the pages in a JSON list according to the required format"
-        ]
+            "Return the pages in a JSON list according to the required format",
+        ],
     )
 
     logger.log_prompt("Explorer", prompt.text())
@@ -61,6 +75,5 @@ async def explorer(state: ExplorerState):
         goto="syntetizer",
         update={
             "pages": [p.model_dump() for p in explorer_response.data.pages] or [],
-        }
+        },
     )
-

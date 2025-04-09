@@ -1,9 +1,14 @@
-from pydantic import BaseModel
+"""Syntetizer agent module for web search operations.
+
+This module provides an agent for synthesizing the answer from the pages.
+"""
+
+from pydantic import BaseModel, Field
 from pydantic_ai import Agent
+
+from websearch.modelcontext import ctx
 from websearch.prompts import SystemPrompt
 from websearch.root_logger import root_logger
-from websearch.modelcontext import ctx
-from pydantic import Field
 
 logger = root_logger.getChild(__name__)
 
@@ -21,17 +26,22 @@ syste_prompt = SystemPrompt(
     ],
 )
 
+
 class Response(BaseModel):
-    """
-    Response from the syntetizer agent.
+    """Response from the syntetizer agent.
 
     Args:
         answer: Answer to the user question based on the page content.
         links: List of links that are used to answer the question.
         error: Error message if the syntetizer failed.
     """
-    answer: str | None = Field(description="Answer to the user question based on the page content.")
-    sources: list[str] | None = Field(description="List of links that are used to answer the question.")
+
+    answer: str | None = Field(
+        description="Answer to the user question based on the page content."
+    )
+    sources: list[str] | None = Field(
+        description="List of links that are used to answer the question."
+    )
     error: str | None = Field(description="Error message if the syntetizer failed.")
 
 

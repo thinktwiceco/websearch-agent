@@ -1,8 +1,14 @@
+"""Query generation agent module for web search operations.
+
+This module provides an agent for generating queries from a user query.
+"""
+
 from pydantic import BaseModel
 from pydantic_ai import Agent
+
+from websearch.modelcontext import ctx
 from websearch.prompts import SystemPrompt
 from websearch.root_logger import root_logger
-from websearch.modelcontext import ctx
 
 logger = root_logger.getChild(__name__)
 
@@ -22,14 +28,15 @@ syste_prompt = SystemPrompt(
     ],
 )
 
+
 class Response(BaseModel):
-    """
-    Response from the query generator agent.
+    """Response from the query generator agent.
 
     Args:
         queries: List of queries that are relevant for answering the question if the query generation was successful.
         error: Error message if the query generation failed.
     """
+
     queries: list[str] | None = None
     error: str | None = None
 
