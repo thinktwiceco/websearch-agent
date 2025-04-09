@@ -1,0 +1,22 @@
+name: Lint and Format
+
+on:
+  push:
+
+jobs:
+  lint-format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+
+    - name: Run linting and formatting checks
+      run: uv run --dev ./scripts/lint.sh 
+      shell: bash
